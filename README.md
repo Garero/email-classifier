@@ -1,14 +1,9 @@
 📧 Classificador Inteligente de Emails - AutoU Case
-https://img.shields.io/badge/Python-3.8+-blue.svg
-https://img.shields.io/badge/Flask-3.0-green.svg
-https://img.shields.io/badge/AI-Groq%2520LLaMA%25203.1-orange.svg
-https://img.shields.io/badge/License-MIT-lightgrey.svg
-https://img.shields.io/badge/Status-Production%2520Ready-brightgreen.svg
 
 Solução inteligente para classificação automática de emails usando IA. Classifica emails como Produtivos ou Improdutivos e gera respostas automáticas contextualizadas em tempo real.
 
 🎥 Demonstração
-🔗 Aplicação Online: https://email-classifier-autou.onrender.com
+🔗 Aplicação Online: https://email-classifier-kd4a.onrender.com
 
 Interface moderna com classificação em tempo real usando Groq AI
 
