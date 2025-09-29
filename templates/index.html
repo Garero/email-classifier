@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Classificador de Emails - AutoU Case</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    
+    .drag-over {
+      border-color: #3b82f6 !important;
+      background-color: #eff6ff !important;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner { animation: spin 1s linear infinite; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl p-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="inline-block p-3 bg-blue-100 rounded-2xl mb-3">
+        <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Classificador Inteligente de Emails</h1>
+      <p class="text-gray-600">Análise automática e resposta sugerida em segundos</p>
+    </div>
+
+    <!-- Upload Area -->
+    <div id="dropZone" class="border-3 border-dashed border-gray-300 rounded-2xl p-8 mb-6 transition-all duration-200 hover:border-blue-400 hover:bg-blue-50 cursor-pointer">
+      <input id="fileInput" type="file" accept=".txt,.pdf" class="hidden" />
+      <div class="text-center">
+        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+        <p class="text-lg font-medium text-gray-700 mb-1">Arraste um arquivo aqui</p>
+        <p class="text-sm text-gray-500 mb-3">ou clique para selecionar</p>
+        <p class="text-xs text-gray-400">Formatos aceitos: .txt, .pdf (max 10MB)</p>
+        <div id="fileName" class="mt-3 text-sm font-medium text-blue-600 hidden"></div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="relative mb-6">
+      <div class="absolute inset-0 flex items-center">
+        <div class="w-full border-t border-gray-300"></div>
+      </div>
+      <div class="relative flex justify-center text-sm">
+        <span class="px-4 bg-white text-gray-500 font-medium">ou cole o texto</span>
+      </div>
+    </div>
+
+    <!-- Text Area -->
+    <div class="mb-6">
+      <textarea 
+        id="emailText" 
+        rows="8" 
+        placeholder="Cole aqui o conteúdo do email para análise..."
+        class="w-full border-2 border-gray-300 rounded-xl p-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none outline-none"
+      ></textarea>
+      <div class="flex items-center justify-between mt-2 text-xs text-gray-500">
+        <span id="charCount">0 caracteres</span>
+        <button id="clearBtn" class="text-red-500 hover:text-red-700 hidden">Limpar</button>
+      </div>
+    </div>
+
+    <!-- Process Button -->
+    <button 
+      id="processBtn" 
+      class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-label="Analisar email"
+    >
+      <span id="btnText">🚀 Analisar Email</span>
+    </button>
+
+    <!-- Loading -->
+    <div id="loading" class="mt-6 hidden">
+      <div class="flex items-center justify-center space-x-3 text-blue-600">
+        <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full spinner"></div>
+        <span class="font-medium">Analisando email...</span>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorMsg" class="mt-6 hidden fade-in" role="alert" aria-live="assertive">
+      <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+        <div class="flex items-start">
+          <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          </svg>
+          <p id="errorText" class="text-red-800 text-sm"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="mt-6 hidden fade-in space-y-4" role="region" aria-live="polite" aria-label="Resultados da análise">
+      <!-- Category -->
+      <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+            </svg>
+            <span class="font-semibold text-gray-700">Categoria Identificada</span>
+          </div>
+          <div id="categoria" class="px-5 py-2 rounded-full font-bold text-lg"></div>
+        </div>
+      </div>
+
+      <!-- Suggested Response -->
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-100">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center space-x-2">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+            </svg>
+            <span class="font-semibold text-gray-800">Resposta Sugerida</span>
+          </div>
+          <button id="copyBtn" class="flex items-center space-x-1 px-3 py-1 bg-white rounded-lg text-blue-600 hover:bg-blue-100 transition-all text-sm font-medium border border-blue-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            <span>Copiar</span>
+          </button>
+        </div>
+        <div id="resposta" class="text-gray-700 leading-relaxed bg-white rounded-lg p-4 shadow-sm"></div>
+      </div>
+
+      <!-- New Analysis Button -->
+      <button id="newAnalysisBtn" class="w-full py-3 border-2 border-gray-300 rounded-xl text-gray-700 font-medium hover:border-blue-500 hover:text-blue-600 transition-all">
+        ← Nova Análise
+      </button>
+    </div>
+  </div>
+
+<script>
+const apiUrl = (location.hostname === 'localhost' ? 'http://localhost:8000' : '') + '/process';
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileName = document.getElementById('fileName');
+const emailText = document.getElementById('emailText');
+const charCount = document.getElementById('charCount');
+const clearBtn = document.getElementById('clearBtn');
+const btn = document.getElementById('processBtn');
+const btnText = document.getElementById('btnText');
+const loading = document.getElementById('loading');
+const results = document.getElementById('results');
+const categoria = document.getElementById('categoria');
+const resposta = document.getElementById('resposta');
+const errorMsg = document.getElementById('errorMsg');
+const errorText = document.getElementById('errorText');
+const copyBtn = document.getElementById('copyBtn');
+const newAnalysisBtn = document.getElementById('newAnalysisBtn');
+
+// Validação de arquivo
+function validateFile(file) {
+  const allowedExtensions = ['.txt', '.pdf'];
+  const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+  
+  if (!allowedExtensions.includes(fileExtension)) {
+    showError('Tipo de arquivo não permitido. Use apenas .txt ou .pdf');
+    return false;
+  }
+  
+  if (file.size > 10 * 1024 * 1024) {
+    showError('Arquivo muito grande. O tamanho máximo é 10MB.');
+    return false;
+  }
+  
+  return true;
+}
+
+// Drag & Drop
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('drag-over');
+});
+
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    if (validateFile(files[0])) {
+      fileInput.files = files;
+      updateFileName();
+    }
+  }
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length > 0) {
+    if (!validateFile(fileInput.files[0])) {
+      fileInput.value = '';
+      fileName.classList.add('hidden');
+      return;
+    }
+  }
+  updateFileName();
+});
+
+function updateFileName() {
+  if (fileInput.files.length > 0) {
+    fileName.textContent = `📎 ${fileInput.files[0].name}`;
+    fileName.classList.remove('hidden');
+  } else {
+    fileName.classList.add('hidden');
+  }
+}
+
+// Character counter
+emailText.addEventListener('input', () => {
+  const count = emailText.value.length;
+  charCount.textContent = `${count} caracteres`;
+  clearBtn.classList.toggle('hidden', count === 0);
+});
+
+clearBtn.addEventListener('click', () => {
+  emailText.value = '';
+  charCount.textContent = '0 caracteres';
+  clearBtn.classList.add('hidden');
+});
+
+// Process email
+btn.addEventListener('click', async () => {
+  results.classList.add('hidden');
+  errorMsg.classList.add('hidden');
+  loading.classList.remove('hidden');
+  btn.disabled = true;
+  btn.setAttribute('aria-busy', 'true');
+  btnText.textContent = 'Processando...';
+
+  const f = fileInput.files[0];
+  const text = emailText.value.trim();
+
+  if (!f && !text) {
+    showError('Por favor, envie um arquivo ou cole o texto do email.');
+    resetButton();
+    return;
+  }
+
+  const fd = new FormData();
+  if (f) fd.append('file', f);
+  if (text) fd.append('text', text);
+
+  try {
+    const res = await fetch(apiUrl, { method: 'POST', body: fd });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || `Erro ${res.status}: ${res.statusText}`);
+    }
+    const data = await res.json();
+
+    if (data.category === 'Produtivo') {
+      categoria.innerHTML = '<span class="flex items-center space-x-2"><span>✅</span><span>Produtivo</span></span>';
+      categoria.className = 'px-5 py-2 rounded-full font-bold text-lg bg-green-100 text-green-700 border-2 border-green-300';
+    } else if (data.category === 'Improdutivo') {
+      categoria.innerHTML = '<span class="flex items-center space-x-2"><span>🛑</span><span>Improdutivo</span></span>';
+      categoria.className = 'px-5 py-2 rounded-full font-bold text-lg bg-red-100 text-red-700 border-2 border-red-300';
+    } else {
+      categoria.textContent = 'Não classificado';
+      categoria.className = 'px-5 py-2 rounded-full font-bold text-lg bg-gray-100 text-gray-700 border-2 border-gray-300';
+    }
+
+    resposta.textContent = data.suggested_response || 'Nenhuma resposta sugerida.';
+    results.classList.remove('hidden');
+    
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    resetButton();
+  }
+});
+
+function showError(msg) {
+  errorText.textContent = msg;
+  errorMsg.classList.remove('hidden');
+  loading.classList.add('hidden');
+}
+
+function resetButton() {
+  loading.classList.add('hidden');
+  btn.disabled = false;
+  btn.setAttribute('aria-busy', 'false');
+  btnText.textContent = '🚀 Analisar Email';
+}
+
+// Copy response
+copyBtn.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(resposta.textContent);
+    const originalHTML = copyBtn.innerHTML;
+    copyBtn.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg><span>Copiado!</span>';
+    copyBtn.classList.add('bg-green-100', 'text-green-600', 'border-green-200');
+    setTimeout(() => {
+      copyBtn.innerHTML = originalHTML;
+      copyBtn.classList.remove('bg-green-100', 'text-green-600', 'border-green-200');
+    }, 2000);
+  } catch (err) {
+    alert('Erro ao copiar texto');
+  }
+});
+
+// New analysis
+newAnalysisBtn.addEventListener('click', () => {
+  results.classList.add('hidden');
+  emailText.value = '';
+  fileInput.value = '';
+  fileName.classList.add('hidden');
+  charCount.textContent = '0 caracteres';
+  clearBtn.classList.add('hidden');
+  errorMsg.classList.add('hidden');
+});
+</script>
+</body>
+</html>
