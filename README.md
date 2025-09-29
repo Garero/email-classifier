@@ -328,8 +328,8 @@ bash
 📞 Contato & Suporte
 👨💻 Desenvolvedor: Gabriel Reis
 🐙 GitHub: @Garero
-📧 Email: [Seu email]
-💼 LinkedIn: [Seu LinkedIn]
+📧 Email: gabrielrrodriguez4@gmail.com
+💼 LinkedIn: https://www.linkedin.com/in/gabriel-rodriguez-62626a1a3/
 
 Projeto desenvolvido para o processo seletivo da AutoU
 
