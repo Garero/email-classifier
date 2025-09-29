@@ -6,7 +6,7 @@ stemming, lemmatização e limpeza de texto.
 
 import re
 import unicodedata
-from typing import List, Dict
+from typing import List, Dict, Any
 import logging
 
 logger = logging.getLogger(__name__)
@@ -26,6 +26,96 @@ STOP_WORDS_PT = {
     'vossos', 'vossas', 'ser', 'estar', 'ter', 'haver', 'fazer', 'ir', 'poder', 'dar',
     'ver', 'saber', 'querer', 'dizer', 'olá', 'oi', 'obrigado', 'obrigada', 'por favor',
     'att', 'atenciosamente', 'cordialmente', 'abs', 'abraço', 'abraços'
+}
+
+# Palavras-chave para classificação PRODUTIVA (setor financeiro)
+PRODUCTIVE_KEYWORDS = {
+    # Problemas e erros
+    'problema', 'erro', 'bug', 'falha', 'defeito', 'avaria', 'quebra', 'pane', 'queda',
+    'não funciona', 'não está funcionando', 'parou', 'travou', 'travando', 'lentidão', 'lento', 'congelou',
+    'fora do ar', 'inoperante', 'inacessível', 'bloqueado', 'quebrado', 'crítico',
+    
+    # Solicitações e pedidos
+    'solicit', 'pedid', 'requer', 'requisi', 'demand', 'necessit', 'precis',
+    'solicitação', 'pedido', 'requisição', 'demanda',
+    
+    # Suporte técnico
+    'suporte', 'ajuda', 'assist', 'suport', 'auxil', 'socorro', 'resolut',
+    'suporte técnico', 'assistência técnica', 'atendimento',
+    
+    # Dúvidas e perguntas
+    'dúvida', 'pergunta', 'question', 'indag', 'consult', 'esclarec', 'explic',
+    'como fazer', 'como usar', 'como configurar',
+    
+    # Prazos e urgência
+    'prazo', 'urgente', 'urgência', 'prioridade', 'prioritário', 'imediato', 'imediatamente', 'rápido',
+    'asap', 'hoje', 'amanhã', 'data', 'vencimento', 'limite',
+    
+    # Financeiro específico
+    'transação', 'pagamento', 'cobrança', 'fatura', 'boleto', 'débito', 'crédito',
+    'extrato', 'saldo', 'conta', 'cartão', 'transferência', 'ted', 'doc', 'pix',
+    'investimento', 'aplicação', 'renda', 'juros', 'taxa', 'tarifa', 'comissão',
+    'empréstimo', 'financiamento', 'parcela', 'divida', 'calote', 'inadimplente',
+    'seguro', 'sinistro', 'indenização', 'apólice',
+    
+    # Sistemas e tecnologia
+    'sistema', 'aplicativo', 'app', 'software', 'hardware', 'login', 'senha',
+    'acesso', 'conexão', 'internet', 'rede', 'servidor', 'banco de dados',
+    'backup', 'restauração', 'atualização', 'upgrade',
+    
+    # Configurações
+    'configurar', 'instalar', 'implementar', 'integrar', 'personalizar', 'ajust',
+    'configuração', 'instalação', 'implementação',
+    
+    # Relatórios e documentos
+    'relatório', 'documento', 'contrato', 'proposta', 'orçamento', 'fatura',
+    'nota fiscal', 'recibo', 'comprovante', 'certificado',
+    
+    # Reuniões e contatos
+    'reunião', 'encontro', 'conferência', 'apresentação', 'reuni', 'encontr',
+    'visita', 'contato', 'telefone', 'email', 'whatsapp',
+    
+    # Status e acompanhamento
+    'status', 'andamento', 'progresso', 'situação', 'estado', 'acompanh',
+    'atualização', 'novidade', 'evolução',
+    
+    # Legal e conformidade
+    'legal', 'jurídico', 'contrato', 'termo', 'cláusula', 'lei', 'norma',
+    'regulamento', 'compliance', 'auditoria', 'fiscalização'
+}
+
+# Palavras-chave para classificação IMPRODUTIVA
+UNPRODUCTIVE_KEYWORDS = {
+    # Agradecimentos
+    'obrigado', 'obrigada', 'agradeço', 'agradecimento', 'grato', 'grata',
+    'valeu', 'brigado', 'brigada',
+    
+    # Parabéns e felicitações
+    'parabéns', 'congratulations', 'felicitações', 'feliz', 'felicidade',
+    'comemoração', 'celebração',
+    
+    # Cumprimentos sociais
+    'bom dia', 'boa tarde', 'boa noite', 'olá', 'oi', 'saudações', 'cumprimentos',
+    'saudação', 'cumprimento', 'saudações', 'saudacoes',
+    
+    # Mensagens pessoais
+    'abraço', 'abraços', 'beijo', 'beijos', 'carinho', 'afeto', 'amizade',
+    'familia', 'família', 'amigo', 'amiga',
+    
+    # Eventos sociais
+    'natal', 'ano novo', 'réveillon', 'pascoa', 'páscoa', 'carnaval', 'feriado',
+    'fest', 'festa', 'confraternização', 'evento social',
+    
+    # Mensagens automáticas
+    'automático', 'automática', 'auto resposta', 'auto-resposta', 'responder',
+    'não responda', 'do not reply',
+    
+    # Newsletters e marketing
+    'newsletter', 'boletim', 'informativo', 'promoção', 'promocional', 'oferta',
+    'desconto', 'cupom', 'marketing', 'publicidade',
+    
+    # Fora do contexto profissional
+    'pessoal', 'particular', 'privado', 'intimo', 'íntimo'
 }
 
 # Dicionário de stemming simples (sufixos comuns em português)
@@ -148,9 +238,11 @@ class TextProcessor:
         Returns:
             Lista de tokens com stemming aplicado
         """
+        if not self.apply_stemming:
+            return tokens
         return [self.stem_word(t) for t in tokens]
     
-    def extract_keywords(self, text: str, top_n: int = 10) -> List[str]:
+    def extract_keywords(self, text: str, top_n: int = 15) -> List[str]:
         """
         Extrai palavras-chave mais relevantes do texto.
         
@@ -184,7 +276,57 @@ class TextProcessor:
         
         return [kw[0] for kw in sorted_keywords[:top_n]]
     
-    def preprocess(self, text: str) -> Dict[str, any]:
+    def classify_by_keywords(self, text: str) -> Dict[str, Any]:
+        """
+        Classifica o texto baseado em palavras-chave (para fallback).
+        
+        Args:
+            text: Texto a classificar
+            
+        Returns:
+            Dicionário com resultado da classificação
+        """
+        text_lower = text.lower()
+        
+        # Contagem de palavras produtivas
+        productive_count = 0
+        for keyword in PRODUCTIVE_KEYWORDS:
+            if keyword in text_lower:
+                productive_count += 1
+                # Palavras muito importantes têm peso duplo
+                if keyword in ['problema', 'erro', 'urgente', 'suporte', 'quebr']:
+                    productive_count += 1
+        
+        # Contagem de palavras improdutivas
+        unproductive_count = 0
+        for keyword in UNPRODUCTIVE_KEYWORDS:
+            if keyword in text_lower:
+                unproductive_count += 1
+        
+        # Lógica de decisão melhorada
+        if productive_count > 0 and productive_count >= unproductive_count:
+            category = "Produtivo"
+            confidence = min(0.8, 0.5 + (productive_count * 0.1))
+            reason = f"Detectadas {productive_count} palavras-chave produtivas"
+        elif unproductive_count > productive_count:
+            category = "Improdutivo"
+            confidence = min(0.8, 0.5 + (unproductive_count * 0.1))
+            reason = f"Detectadas {unproductive_count} palavras-chave improdutivas"
+        else:
+            # Empate ou nenhuma palavra-chave - tende para produtivo (mais seguro)
+            category = "Produtivo"
+            confidence = 0.5
+            reason = "Nenhuma palavra-chave clara detectada - classificação padrão para produtivo"
+        
+        return {
+            'category': category,
+            'confidence': confidence,
+            'reason': reason,
+            'productive_count': productive_count,
+            'unproductive_count': unproductive_count
+        }
+    
+    def preprocess(self, text: str) -> Dict[str, Any]:
         """
         Pipeline completo de pré-processamento NLP.
         
@@ -192,14 +334,7 @@ class TextProcessor:
             text: Texto original
             
         Returns:
-            Dicionário com resultados do processamento:
-            - original: texto original
-            - normalized: texto normalizado
-            - tokens: lista de tokens
-            - tokens_clean: tokens sem stop words
-            - tokens_stemmed: tokens com stemming
-            - keywords: palavras-chave extraídas
-            - statistics: estatísticas do texto
+            Dicionário com resultados do processamento
         """
         try:
             # 1. Normalização
@@ -212,23 +347,30 @@ class TextProcessor:
             tokens_clean = self.remove_stop_words(tokens) if self.remove_stopwords else tokens
             
             # 4. Stemming
-            tokens_stemmed = self.stem_tokens(tokens_clean) if self.apply_stemming else tokens_clean
+            tokens_stemmed = self.stem_tokens(tokens_clean)
             
             # 5. Extração de palavras-chave
             keywords = self.extract_keywords(text)
             
-            # 6. Estatísticas
+            # 6. Classificação por palavras-chave
+            classification = self.classify_by_keywords(text)
+            
+            # 7. Estatísticas
             statistics = {
                 'original_length': len(text),
                 'token_count': len(tokens),
                 'unique_tokens': len(set(tokens)),
                 'tokens_after_stopwords': len(tokens_clean),
                 'tokens_after_stemming': len(tokens_stemmed),
-                'keyword_count': len(keywords)
+                'keyword_count': len(keywords),
+                'productive_keywords_found': classification['productive_count'],
+                'unproductive_keywords_found': classification['unproductive_count']
             }
             
             logger.info(f"Texto processado: {statistics['token_count']} tokens, "
-                       f"{statistics['keyword_count']} keywords extraídas")
+                       f"{statistics['keyword_count']} keywords, "
+                       f"Classificação: {classification['category']} "
+                       f"(confiança: {classification['confidence']})")
             
             return {
                 'original': text,
@@ -238,13 +380,44 @@ class TextProcessor:
                 'tokens_stemmed': tokens_stemmed,
                 'keywords': keywords,
                 'statistics': statistics,
-                'processed_text': ' '.join(tokens_stemmed)  # Texto processado final
+                'classification': classification,
+                'processed_text': ' '.join(tokens_stemmed)
             }
             
         except Exception as e:
             logger.error(f"Erro no pré-processamento NLP: {str(e)}")
+
+            # Garante que sempre teremos uma string para o fallback
+            text_str = text if isinstance(text, str) else str(text)
+
+            tokens_fallback = text_str.split()
+            classification_fallback = {
+                'category': 'Produtivo',  # Padrão seguro
+                'confidence': 0.5,
+                'reason': 'Erro no processamento - classificação padrão',
+                'productive_count': 0,
+                'unproductive_count': 0
+            }
+            
             return {
-                'original': text,
+                'original': text_str,
+                'normalized': text_str.lower(),
+                'tokens': tokens_fallback,
+                'tokens_clean': tokens_fallback,
+                'tokens_stemmed': tokens_fallback,
+                'keywords': [],
+                'statistics': {
+                    'original_length': len(text_str),
+                    'token_count': len(tokens_fallback),
+                    'unique_tokens': len(set(tokens_fallback)),
+                    'tokens_after_stopwords': len(tokens_fallback),
+                    'tokens_after_stemming': len(tokens_fallback),
+                    'keyword_count': 0,
+                    'productive_keywords_found': 0,
+                    'unproductive_keywords_found': 0
+                },
+                'classification': classification_fallback,
+                'processed_text': text_str,
                 'error': str(e)
             }
 
@@ -252,36 +425,39 @@ class TextProcessor:
 def clean_email_text(text: str) -> str:
     """
     Limpeza específica para emails (remove assinaturas, disclaimers, etc).
-    
-    Args:
-        text: Texto do email
-        
-    Returns:
-        Texto limpo
+    Também normaliza para minúsculas e remove pontuação.
     """
+    # Converte para minúsculas
+    text = text.lower()
+
     # Remove múltiplas quebras de linha
     text = re.sub(r'\n{3,}', '\n\n', text)
-    
+
     # Remove múltiplos espaços
     text = re.sub(r' {2,}', ' ', text)
-    
+
     # Remove linhas com apenas símbolos
     text = re.sub(r'^[^\w\s]+$', '', text, flags=re.MULTILINE)
-    
+
     # Remove URLs
-    text = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', text)
-    
+    text = re.sub(r'http[s]?://\S+', '', text)
+
     # Remove emails
     text = re.sub(r'\S+@\S+', '', text)
-    
+
     # Remove números de telefone
     text = re.sub(r'\(?\d{2}\)?\s?\d{4,5}-?\d{4}', '', text)
-    
+
+    # Remove pontuação geral
+    text = re.sub(r'[^\w\s]', '', text)
+
+    # Normaliza espaços extras
+    text = re.sub(r'\s+', ' ', text)
+
     return text.strip()
 
 
-# Função de conveniência para uso rápido
-def process_email_text(text: str) -> Dict[str, any]:
+def process_email_text(text: str) -> Dict[str, Any]:
     """
     Função helper para processar texto de email rapidamente.
     
@@ -330,6 +506,12 @@ if __name__ == "__main__":
     
     print(f"\n🔑 Palavras-chave extraídas:")
     print(f"  {', '.join(result['keywords'][:5])}")
+    
+    print(f"\n🎯 Classificação por palavras-chave:")
+    classification = result['classification']
+    print(f"  • Categoria: {classification['category']}")
+    print(f"  • Confiança: {classification['confidence']:.2f}")
+    print(f"  • Motivo: {classification['reason']}")
     
     print(f"\n✨ Texto processado (stemming + sem stopwords):")
     print(f"  {result['processed_text'][:100]}...")
