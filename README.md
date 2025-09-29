@@ -326,7 +326,7 @@ bash
 # Solução: A IA pode estar sob carga pesada
 # O sistema automaticamente usa fallback após 30 segundos
 📞 Contato & Suporte
-👨💻 Desenvolvedor: Gabriel Rocha
+👨💻 Desenvolvedor: Gabriel Reis
 🐙 GitHub: @Garero
 📧 Email: [Seu email]
 💼 LinkedIn: [Seu LinkedIn]
