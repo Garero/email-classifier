@@ -360,5 +360,3 @@ Repositório GitHub
 Groq Console
 
 Documentação Render
-
-Última atualização: Janeiro 2024
