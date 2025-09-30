@@ -98,32 +98,33 @@ def classify_with_ai(email_text, nlp_data=None):
         # PROMPT
         prompt = f"""Você é um classificador especializado em emails CORPORATIVOS.
 
-CONTEXTO: Você trabalha para uma empresa e deve classificar emails baseado em URGÊNCIA e NECESSIDADE DE AÇÃO.
+CONTEXTO: Você trabalha para uma empresa e deve classificar emails baseado em URGÊNCIA e NECESSIDADE DE AÇÃO NO CONTEXTO PROFISSIONAL.
 
 DIRETRIZES ESTRITAS DE CLASSIFICAÇÃO:
 
-🔴 **CLASSIFICAR COMO "Produtivo" SE CONTIVER:**
-- Problemas, erros, falhas técnicas
-- Solicitações de suporte/tarefas/ações
-- Dúvidas sobre projetos/trabalho
-- Prazos, urgências, datas limites
-- Solicitações de documentos/relatórios/informações
-- Reuniões, agendamentos, compromissos de trabalho
-- Orçamentos, aprovações, alocações de recursos
+🔴 **CLASSIFICAR COMO "Produtivo" APENAS SE FOR RELACIONADO A TRABALHO:**
+- Problemas, erros, falhas técnicas NO TRABALHO
+- Solicitações de suporte/tarefas/ações PROFISSIONAIS
+- Dúvidas sobre PROJETOS/TRABALHO/EMPresa
+- Prazos, urgências, datas limites DE TRABALHO
+- Reuniões, agendamentos, compromissos PROFISSIONAIS
+- Orçamentos, aprovações, recursos CORPORATIVOS
 - Processos seletivos, entrevistas, recrutamento
-- Relatórios, métricas, resultados
-- Qualquer solicitação que exija ação/resposta
+- Relatórios, métricas, resultados EMPRESARIAIS
 
-🟢 **CLASSIFICAR COIM "Improdutivo" APENAS SE:**
-- Apenas agradecimentos sem solicitação
-- Apenas cumprimentos sociais
-- Apenas parabéns genéricos
-- Newsletters/marketing/promoções
-- Mensagens automáticas sem ação necessária
-- Assuntos pessoais/familiares/sociais
+🟢 **CLASSIFICAR COMO "Improdutivo" SE FOR:**
+- Assuntos PESSOAIS (festas, aniversários, eventos sociais)
+- Promoções COMERCIAIS (ofertas, descontos, marketing)
+- Newsletters, marketing, spam
+- Mensagens automáticas sem ação profissional
+- Cumprimentos sociais sem contexto de trabalho
 - Entretenimento, redes sociais, cadeias de email
+- Qualquer email NÃO RELACIONADO ao ambiente profissional
 
-REGRA IMPORTANTE: Se o email mencionar QUALQUER trabalho, projeto, tarefa, solicitação, problema ou ação necessária → SEMPRE "Produtivo"
+REGRA CRÍTICA: 
+- AÇÃO PESSOAL = IMPRODUTIVO (ex: confirmar presença em festa)
+- AÇÃO COMERCIAL = IMPRODUTIVO (ex: comprar produtos)
+- AÇÃO PROFISSIONAL = PRODUTIVO (ex: entregar relatório)
 
 {nlp_context}
 
