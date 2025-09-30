@@ -11,4 +11,4 @@ __all__ = [
     'clean_email_text'
 ]
 
-__version__ = '2.1.0'
+__version__ = '2.2.0'

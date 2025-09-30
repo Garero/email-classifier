@@ -42,17 +42,16 @@ instance/
 .DS_Store
 Thumbs.db
 
-# Uploads
+# Uploads - ignora arquivos mas mantém a pasta
 uploads/*.pdf
 uploads/*.txt
-
+!uploads/.gitkeep
 
 # Coverage files
 .coverage
 .coverage.*
 htmlcov/
 .coverage_html/
-
 
 # Logs
 *.log

@@ -1,15 +1,15 @@
 # Framework Web
-Flask==2.3.3
+Flask==3.0.0
 flask-cors==4.0.0
 
 # IA e Groq API
-groq==0.9.0
+groq==0.4.1
 
-# Processamento de PDF
-PyMuPDF==1.23.8
+# Processamento de PDF (versão com wheels pré-compilados)
+PyMuPDF==1.24.13
 
 # Utilitários Web
-Werkzeug==2.3.7
+Werkzeug==3.0.1
 
 # Servidor de Produção
 gunicorn==21.2.0
