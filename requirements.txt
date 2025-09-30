@@ -16,3 +16,6 @@ gunicorn==21.2.0
 
 # Variáveis de Ambiente
 python-dotenv==1.0.0
+
+#HTTPX
+httpx==0.24.0
