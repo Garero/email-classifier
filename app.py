@@ -154,7 +154,7 @@ RESPONDA APENAS EM JSON (sem markdown, sem texto adicional):
                     "content": prompt
                 }
             ],
-            model="llama-3.1-70b-versatile",
+            model="llama-3.1-8b-instant",
             temperature=0.1,  # Reduzido para menos criatividade, mais precisão
             max_tokens=800,
             response_format={"type": "json_object"},
@@ -343,7 +343,7 @@ def process_email():
             "reason": reason,
             "text_length": len(email_text),
             "timestamp": datetime.now().isoformat(),
-            "ai_model": "llama-3.1-70b-versatile"
+            "ai_model": "llama-3.1-8b-instant"
         }
         
         # Adiciona keywords se NLP foi bem sucedido
@@ -373,7 +373,7 @@ if __name__ == "__main__":
     
     print("🚀 Servidor iniciando...")
     print("🔗 API: http://localhost:8000")
-    print("🤖 IA: Groq (LLaMA 3.1 70B)")
+    print("🤖 IA: Groq (LLaMA 3.1 8B)")
     print("📊 NLP: Stop Words + Stemming + Keywords Extraction")
     print("🎯 Classificador: Modo AGGRESSIVO-PRODUTIVO ativado")
     
