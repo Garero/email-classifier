@@ -47,5 +47,12 @@ uploads/
 *.pdf
 *.txt
 
+# Coverage files
+.coverage
+.coverage.*
+htmlcov/
+.coverage_html/
+
+
 # Logs
 *.log
