@@ -45,7 +45,6 @@ Thumbs.db
 # Uploads
 uploads/
 *.pdf
-*.txt
 
 # Coverage files
 .coverage
