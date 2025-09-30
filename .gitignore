@@ -43,8 +43,9 @@ instance/
 Thumbs.db
 
 # Uploads
-uploads/
-*.pdf
+uploads/*.pdf
+uploads/*.txt
+
 
 # Coverage files
 .coverage
