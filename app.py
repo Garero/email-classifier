@@ -111,6 +111,7 @@ DIRETRIZES ESTRITAS DE CLASSIFICAÇÃO:
 - Orçamentos, aprovações, recursos CORPORATIVOS
 - Processos seletivos, entrevistas, recrutamento
 - Relatórios, métricas, resultados EMPRESARIAIS
+- Eventos corporativos (confraternizações, team building organizado pela empresa)
 
 🟢 **CLASSIFICAR COMO "Improdutivo" SE FOR:**
 - Assuntos PESSOAIS (festas, aniversários, eventos sociais)
