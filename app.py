@@ -95,41 +95,36 @@ def classify_with_ai(email_text, nlp_data=None):
             keywords = ', '.join(nlp_data['keywords'][:5])
             nlp_context = f"\n\nPALAVRAS-CHAVE DETECTADAS: {keywords}"
         
-        # PROMPT MELHORADO - Mais específico para setor financeiro
-        prompt = f"""Você é um classificador especializado em emails CORPORATIVOS do SETOR FINANCEIRO.
+        # PROMPT
+        prompt = f"""Você é um classificador especializado em emails CORPORATIVOS.
 
-CONTEXTO: Você trabalha para um banco/fintech e deve classificar emails baseado em URGÊNCIA e NECESSIDADE DE AÇÃO.
+CONTEXTO: Você trabalha para uma empresa e deve classificar emails baseado em URGÊNCIA e NECESSIDADE DE AÇÃO.
 
 DIRETRIZES ESTRITAS DE CLASSIFICAÇÃO:
 
 🔴 **CLASSIFICAR COMO "Produtivo" SE CONTIVER:**
-- Problemas técnicos (sistema, app, login, transação)
-- Solicitações de suporte/suporte técnico
-- Dúvidas sobre produtos/serviços financeiros
-- Problemas com pagamentos/transações/cobranças
-- Solicitações de documentos/extratos/relatórios
-- Prazos/urgências/datas limites
-- Erros/falhas/bugs no sistema
-- Solicitações de informações específicas
-- Reclamações de clientes
-- Mesmo que tenha "obrigado" ou "por favor", se tiver PROBLEMA = PRODUTIVO
+- Problemas, erros, falhas técnicas
+- Solicitações de suporte/tarefas/ações
+- Dúvidas sobre projetos/trabalho
+- Prazos, urgências, datas limites
+- Solicitações de documentos/relatórios/informações
+- Reuniões, agendamentos, compromissos de trabalho
+- Orçamentos, aprovações, alocações de recursos
+- Processos seletivos, entrevistas, recrutamento
+- Relatórios, métricas, resultados
+- Qualquer solicitação que exija ação/resposta
 
-🟢 **CLASSIFICAR COMO "Improdutivo" APENAS SE:**
+🟢 **CLASSIFICAR COIM "Improdutivo" APENAS SE:**
 - Apenas agradecimentos sem solicitação
 - Apenas cumprimentos sociais
 - Apenas parabéns genéricos
-- Newsletters/marketing
-- Mensagens automáticas
-- Confirmações simples sem ação necessária
+- Newsletters/marketing/promoções
+- Mensagens automáticas sem ação necessária
+- Assuntos pessoais/familiares/sociais
+- Entretenimento, redes sociais, cadeias de email
 
-REGRA IMPORTANTE: Se o email mencionar QUALQUER problema, erro, solicitação ou dúvida → SEMPRE "Produtivo"
+REGRA IMPORTANTE: Se o email mencionar QUALQUER trabalho, projeto, tarefa, solicitação, problema ou ação necessária → SEMPRE "Produtivo"
 
-EXEMPLOS:
-- "Problema no login" → Produtivo
-- "Erro na transação" → Produtivo  
-- "Solicito extrato" → Produtivo
-- "Obrigado pelo atendimento" → Improdutivo
-- "Parabéns pela equipe" → Improdutivo
 {nlp_context}
 
 EMAIL PARA CLASSIFICAR:
